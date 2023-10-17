@@ -143,6 +143,26 @@ public class LoanDaoImpl implements LoanDao {
         return null; // Book with the given ID not found or no due date set
     }
 
+    @Override
+    public List<Long> getOverdueBookIds() {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(
+                     "SELECT book_id FROM loan WHERE due_date < ? AND returned_date IS NULL")) {
+
+            statement.setDate(1, Date.valueOf(LocalDate.now()));
+            try (ResultSet resultSet = statement.executeQuery()) {
+                List<Long> overdueBookIds = new ArrayList<>();
+                while (resultSet.next()) {
+                    long bookId = resultSet.getLong("book_id");
+                    overdueBookIds.add(bookId);
+                }
+                return overdueBookIds;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error fetching overdue book IDs", e);
+        }
+    }
+
     /**
      * Utility method to map a ResultSet to a Loan object
      */

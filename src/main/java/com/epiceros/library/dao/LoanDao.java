@@ -22,4 +22,6 @@ public interface LoanDao {
     LocalDate getDueDateForBook(Long bookId);
 
     List<Long> getOverdueBookIds();
+
+    List<Loan> getLoansByMemberId(Long memberId);
 }

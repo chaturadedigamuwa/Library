@@ -8,6 +8,7 @@ import com.epiceros.library.entity.Book;
 import com.epiceros.library.entity.Loan;
 import com.epiceros.library.service.FineService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -15,7 +16,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-
+@Service
 public class FineServiceImpl implements FineService {
 
     @Autowired

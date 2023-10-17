@@ -1,14 +1,20 @@
 package com.epiceros.library.entity;
 
+import lombok.Data;
+
 import java.time.LocalDate;
 import java.util.Date;
 
+@Data
 public class Loan {
     private Long id;
     private Long memberId;
     private Long bookId;
     private LocalDate loanDate;
     private LocalDate dueDate;
+
+    private LocalDate returnedDate;
+
 
     public Loan() {
 
@@ -63,5 +69,13 @@ public class Loan {
 
     public void setDueDate(LocalDate dueDate) {
         this.dueDate = dueDate;
+    }
+
+    public LocalDate getReturnedDate() {
+        return returnedDate;
+    }
+
+    public void setReturnedDate(LocalDate returnedDate) {
+        this.returnedDate = returnedDate;
     }
 }

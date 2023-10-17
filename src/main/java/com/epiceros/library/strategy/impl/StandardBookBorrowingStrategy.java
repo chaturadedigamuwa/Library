@@ -14,6 +14,5 @@ public class StandardBookBorrowingStrategy implements BorrowingStrategy {
     @Override
     public void validateBorrowing(Member member) {
         totalBorrowedStrategy.validateBorrowing(member);
-        System.out.println("validated Standard");
     }
 }

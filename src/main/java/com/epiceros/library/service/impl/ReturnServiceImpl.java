@@ -8,13 +8,14 @@ import com.epiceros.library.exception.InvalidReturnRequestException;
 import com.epiceros.library.service.FineService;
 import com.epiceros.library.service.ReturnService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
+@Service
 public class ReturnServiceImpl implements ReturnService {
     @Autowired
     private LoanDao loanDao;
@@ -54,8 +55,8 @@ public class ReturnServiceImpl implements ReturnService {
             throw new RuntimeException("SQL Error occurred while processing the return request.", e);
 
         } finally {
-            connection.close();
             connection.setAutoCommit(true);
+            connection.close();
         }
         return request.getBookIds();
     }

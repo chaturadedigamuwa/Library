@@ -13,6 +13,5 @@ public class ClassicBookBorrowingStrategy implements BorrowingStrategy {
     @Override
     public void validateBorrowing(Member member) {
         totalBorrowedStrategy.validateBorrowing(member);
-        System.out.println("validated Classic");
     }
 }

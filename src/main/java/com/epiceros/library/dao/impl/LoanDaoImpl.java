@@ -14,6 +14,7 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class LoanDaoImpl implements LoanDao {
@@ -163,6 +164,27 @@ public class LoanDaoImpl implements LoanDao {
         }
     }
 
+    @Override
+    public List<Loan> getLoansByMemberId(Long memberId) {
+        List<Loan> loans = new ArrayList<>();
+        try (Connection connection = dataSource.getConnection()) {
+            String sql = "SELECT * FROM loan WHERE member_id = ?";
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setLong(1, memberId);
+
+            ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                Loan loan = mapResultSetToLoan(resultSet); // Use mapResultSetToLoan method
+                loans.add(loan);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error fetching loans by member ID", e);
+        }
+
+        return loans;
+    }
+
     /**
      * Utility method to map a ResultSet to a Loan object
      */
@@ -173,7 +195,13 @@ public class LoanDaoImpl implements LoanDao {
         loan.setBookId(resultSet.getLong("book_id"));
         loan.setLoanDate(resultSet.getDate("loan_date").toLocalDate());
         loan.setDueDate(resultSet.getDate("due_date").toLocalDate());
-        return loan;
+        Optional<Date> returnedDateOptional = Optional.ofNullable(resultSet.getDate("returned_date"));
+        if (returnedDateOptional.isPresent()) {
+            Date returnedDate = returnedDateOptional.get();
+            loan.setReturnedDate(returnedDate.toLocalDate());
+        } else {
+            loan.setReturnedDate(null);
+        }        return loan;
     }
     /**
      *     Utility method to map a ResultSet to a Book object

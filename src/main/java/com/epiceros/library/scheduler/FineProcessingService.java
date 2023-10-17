@@ -2,13 +2,11 @@ package com.epiceros.library.scheduler;
 
 import com.epiceros.library.dao.FineDao;
 import com.epiceros.library.dao.LoanDao;
-import com.epiceros.library.entity.Book;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
+import org.springframework.stereotype.Service;
 import java.util.List;
 
+@Service
 public class FineProcessingService {
     @Autowired
     private LoanDao loanDao;

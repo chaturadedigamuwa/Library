@@ -1,4 +1,4 @@
-package com.epiceros.library.dto;
+package com.epiceros.library.dto.request;
 
 import java.util.List;
 

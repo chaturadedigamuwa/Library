@@ -2,6 +2,7 @@ package com.epiceros.library.dao.impl;
 
 import com.epiceros.library.dao.BookDao;
 import com.epiceros.library.dao.MemberDao;
+import com.epiceros.library.dto.request.ReturnRequest;
 import com.epiceros.library.entity.Book;
 import com.epiceros.library.entity.BookCategory;
 import com.epiceros.library.exception.BookNotFoundException;
@@ -15,6 +16,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 @Repository
 public class BookDaoImpl implements BookDao {
@@ -38,6 +40,7 @@ public class BookDaoImpl implements BookDao {
         return null; // Book with the given ID not found
     }
 
+    @Override
     public void incrementCopiesOwned(Long bookId) {
         try (Connection connection = dataSource.getConnection()) {
             String sql = "UPDATE book SET copies_owned = copies_owned + 1 WHERE id = ?";
@@ -46,10 +49,12 @@ public class BookDaoImpl implements BookDao {
                 statement.executeUpdate();
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error incrementing copies owned.", e);
+            throw new RuntimeException("Error incrementing copies owned for book with ID " + bookId, e);
         }
     }
 
+
+    @Override
     public void decrementCopiesOwned(Long bookId) {
         if (getCopiesOwned(bookId) > 0) {
             try (Connection connection = dataSource.getConnection()) {
@@ -59,9 +64,9 @@ public class BookDaoImpl implements BookDao {
                     statement.executeUpdate();
                 }
             } catch (SQLException e) {
-                throw new RuntimeException("Error incrementing copies owned.", e);
+                throw new RuntimeException("Error decrementing copies owned.", e);
             }
-        } else throw new CopiesNotAvailableException("No copies available with book with ID " + bookId);
+        } else throw new CopiesNotAvailableException("No copies available of book with ID " + bookId);
     }
 
     public int getCopiesOwned(Long bookId) {

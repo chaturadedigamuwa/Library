@@ -101,6 +101,13 @@ H2 database is used for the ease of use and minimize configurations.
 schema.sql contains DDL
 data.sql contains DLL
 
+![img_1.png](img_1.png)
+
+url - http://localhost:8080/h2-console
+
+![img_2.png](img_2.png)
+
+
 ### Entities After Normalized:
 
 Book: Represents information about individual books in the library's collection.

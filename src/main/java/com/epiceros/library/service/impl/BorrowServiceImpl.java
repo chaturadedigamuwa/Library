@@ -13,6 +13,8 @@ import com.epiceros.library.exception.MemberNotFoundException;
 import com.epiceros.library.factory.BorrowingStrategyFactory;
 import com.epiceros.library.service.BorrowService;
 import com.epiceros.library.strategy.BorrowingStrategy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +27,9 @@ import java.util.Optional;
 
 @Service
 public class BorrowServiceImpl implements BorrowService {
+
+    private static final Logger logger = LoggerFactory.getLogger(BorrowServiceImpl.class);
+
     @Autowired
     private MemberDao memberDao;
     @Autowired
@@ -38,11 +43,13 @@ public class BorrowServiceImpl implements BorrowService {
 
     private static final int MAX_TOTAL_BORROW_ONE_TIME = 5;
 
-
     public List<Loan> borrowBooks(BorrowRequest request) throws SQLException {
+
         Long memberId = request.getMemberId();
         List<Long> bookIds = request.getBookIds();
         List<Loan> createdLoans = new ArrayList<>();
+
+        logger.info("Borrow request received for Member ID: {}, Books: {}", memberId, bookIds);
 
         // Ensure the request contains no more than 5 books
         if (bookIds.size() > MAX_TOTAL_BORROW_ONE_TIME) {
@@ -53,6 +60,8 @@ public class BorrowServiceImpl implements BorrowService {
         memberOptional.orElseThrow(() -> new MemberNotFoundException("Member with ID " + memberId + " not found."));
 
         for (Long bookId : bookIds) {
+
+            // Check the book availability
             Optional<Book> bookOptional = Optional.ofNullable(bookDao.getBookById(bookId));
             bookOptional.orElseThrow(() -> new BookNotFoundException("Book with ID " + bookId + " not found."));
 
@@ -67,6 +76,10 @@ public class BorrowServiceImpl implements BorrowService {
             loan.setBookId(bookId);
             createdLoans.add(loan);
         }
+        logger.info("Book with ID {} borrowed successfully by Member ID {}", bookIds, memberId);
+
+        logger.info("Borrow request completed successfully.");
+
         return createdLoans;
     }
 }

@@ -7,6 +7,8 @@ import com.epiceros.library.entity.Loan;
 import com.epiceros.library.exception.InvalidReturnRequestException;
 import com.epiceros.library.service.FineService;
 import com.epiceros.library.service.ReturnService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,9 @@ import java.util.List;
 
 @Service
 public class ReturnServiceImpl implements ReturnService {
+
+    private static final Logger logger = LoggerFactory.getLogger(ReturnServiceImpl.class);
+
     @Autowired
     private LoanDao loanDao;
     @Autowired
@@ -32,6 +37,8 @@ public class ReturnServiceImpl implements ReturnService {
     public List<Long> returnBooks(ReturnRequest request) throws InvalidReturnRequestException, SQLException {
         Connection connection = null;
         try {
+            logger.info("Starting return process for Request: {}", request);
+
             connection = dataSource.getConnection();
             connection.setAutoCommit(false);
 
@@ -50,8 +57,14 @@ public class ReturnServiceImpl implements ReturnService {
             fineService.processFinesForOverdueBooks(connection, overdueBookIds);
 
             connection.commit();
+
+            logger.info("Return process completed successfully for Request: {}", request);
+
         } catch (SQLException e) {
             connection.rollback();
+
+            logger.error("SQL Error occurred while processing the return request: {}", e.getMessage());
+
             throw new RuntimeException("SQL Error occurred while processing the return request.", e);
 
         } finally {
@@ -70,11 +83,13 @@ public class ReturnServiceImpl implements ReturnService {
         for (Long loanId : loanIds) {
             Loan loan = loanDao.getLoanById(loanId);
             if (loan == null) {
+                logger.error("Loan with ID {} not found.", loanId);
                 throw new InvalidReturnRequestException("Loan with ID " + loanId + " not found.");
             }
         }
         for (Long bookId : bookIds) {
             if (!loanDao.isBookOnLoanToMember(bookId, memberId)) {
+                logger.error("Book with ID {} is not currently on loan to member with ID {}", bookId, memberId);
                 throw new InvalidReturnRequestException("Book with ID " + bookId + " is not currently on loan to member with ID " + memberId);
             }
         }

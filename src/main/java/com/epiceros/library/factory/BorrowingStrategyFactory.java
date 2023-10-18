@@ -30,6 +30,5 @@ public class BorrowingStrategyFactory {
                 throw new IllegalArgumentException("Invalid book category.");
         }
     }
-
 }
 

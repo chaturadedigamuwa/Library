@@ -7,6 +7,8 @@ import com.epiceros.library.dto.request.ReturnRequest;
 import com.epiceros.library.entity.Book;
 import com.epiceros.library.entity.Loan;
 import com.epiceros.library.service.FineService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,26 +21,37 @@ import java.util.List;
 @Service
 public class FineServiceImpl implements FineService {
 
+    private static final Logger logger = LoggerFactory.getLogger(FineServiceImpl.class);
+
     @Autowired
     private LoanDao loanDao;
     @Autowired
     private BookDao bookDao;
-
     @Autowired
     private FineDao fineDao;
+
+    /**
+     * Calculates and returns a list of IDs for books that are overdue for return based on the provided request.
+     *
+     * @param request The ReturnRequest containing necessary information for calculating overdue books.
+     * @return A list of Long values representing the IDs of overdue books.
+     */
     @Override
     public List<Long> calculateOverdueBooks(ReturnRequest request) {
         List<Long> overdueBookIds = new ArrayList<>();
-
         for (Long loanId : request.getLoanIds()) {
-            Loan loan = loanDao.getLoanById(loanId);
-            if (loan != null) {
-                LocalDate dueDate = loan.getDueDate();
-                LocalDate today = LocalDate.now();
+            try {
+                Loan loan = loanDao.getLoanById(loanId);
+                if (loan != null) {
+                    LocalDate dueDate = loan.getDueDate();
+                    LocalDate today = LocalDate.now();
 
-                if (today.isAfter(dueDate)) {
-                    overdueBookIds.add(loan.getBookId());
+                    if (today.isAfter(dueDate)) {
+                        overdueBookIds.add(loan.getBookId());
+                    }
                 }
+            } catch (Exception e) {
+                logger.error("Error occurred while calculating overdue books for loan ID {}: {}", loanId, e.getMessage());
             }
         }
 
@@ -51,13 +64,17 @@ public class FineServiceImpl implements FineService {
             connection.setAutoCommit(false);
 
             for (Long bookId : overdueBookIds) {
-                Book book = bookDao.getBookById(bookId);
+                try {
 
-                double fineAmount = calculateFineForBook(book);
+                    Book book = bookDao.getBookById(bookId);
 
-                // Save the fine to the database
-                fineDao.saveFine(bookId, fineAmount);
+                    double fineAmount = calculateFineForBook(book);
 
+                    // Save the fine to the database
+                    fineDao.saveFine(bookId, fineAmount);
+                } catch (Exception e) {
+                    logger.error("Error occurred while processing fine for book ID {}: {}", bookId, e.getMessage());
+                }
             }
 
             connection.commit();
@@ -65,8 +82,9 @@ public class FineServiceImpl implements FineService {
             try {
                 connection.rollback();
             } catch (SQLException rollbackException) {
-                // Handle rollback exception
+                logger.error("Error occurred during rollback: {}", rollbackException.getMessage());
             }
+            logger.error("Error processing fines for overdue books: {}", e.getMessage());
             throw new RuntimeException("Error processing fines for overdue books.", e);
         }
     }

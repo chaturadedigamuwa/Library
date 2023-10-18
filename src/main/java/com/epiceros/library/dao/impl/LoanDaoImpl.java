@@ -22,7 +22,7 @@ public class LoanDaoImpl implements LoanDao {
     private DataSource dataSource;
 
     @Value("${library.fine.days}")
-    private int fineDays;
+    private int fineDays; // the maximum days for loaned book. This is used when decide due date for book
 
     @Override
     public void saveLoan(long memberId, long bookId) throws SQLException {
@@ -168,7 +168,7 @@ public class LoanDaoImpl implements LoanDao {
     public List<Loan> getLoansByMemberId(Long memberId) {
         List<Loan> loans = new ArrayList<>();
         try (Connection connection = dataSource.getConnection()) {
-            String sql = "SELECT * FROM loan WHERE member_id = ?";
+            String sql = "SELECT * FRO loan WHERE member_id = ?";
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setLong(1, memberId);
 

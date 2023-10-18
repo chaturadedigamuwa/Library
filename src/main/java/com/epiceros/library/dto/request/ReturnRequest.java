@@ -8,6 +8,11 @@ public class ReturnRequest {
 
     private List<Long> loanIds;
 
+    public ReturnRequest(List<Long> bookIds, List<Long> loanIds) {
+        this.loanIds = loanIds;
+        this.bookIds = bookIds;
+    }
+
     public Long getMemberId() {
         return memberId;
     }

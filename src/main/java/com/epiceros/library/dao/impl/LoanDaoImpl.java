@@ -168,7 +168,7 @@ public class LoanDaoImpl implements LoanDao {
     public List<Loan> getLoansByMemberId(Long memberId) {
         List<Loan> loans = new ArrayList<>();
         try (Connection connection = dataSource.getConnection()) {
-            String sql = "SELECT * FRO loan WHERE member_id = ?";
+            String sql = "SELECT * FROM loan WHERE member_id = ?";
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setLong(1, memberId);
 
